@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <link href="assets/css/admin-profile.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#019863',
+                        secondary: '#1C160C',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1C160C;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex flex-col min-h-screen">
+        <header class="flex items-center justify-between px-6 py-4 bg-white shadow-sm">
+            <h1 class="text-xl font-bold text-[#1C160C]">Company</h1>
+            <div class="relative">
+                <div id="authButtons" class="flex items-center space-x-4" style="display: none;">
+                    <a href="login.html" class="btn-primary">Login</a>
+                    <a href="signup.html" class="text-[#019863] hover:text-[#017A4E]">Sign up</a>
+                </div>
+                <button id="userProfileBtn" class="flex items-center space-x-2 focus:outline-none" style="display: none;"></button>
+                <div id="userDropdown" class="user-dropdown"></div>
+                <button id="logoutBtnHeader" class="hidden px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">Logout</button>
+            </div>
+        </header>
+        <main class="flex-1 flex flex-col items-center justify-center py-8">
+            <div class="w-full max-w-4xl mx-auto space-y-8">
+                <!-- Vehicle Registration Section -->
+                <div class="bg-white rounded-xl shadow-md p-8">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-[#1C160C]">My Vehicles</h2>
+                        <button id="addVehicleBtn" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-green-700 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path>
+                            </svg>
+                            Add Vehicle
+                        </button>
+                    </div>
+                    <div id="vehicleGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Vehicle cards will be added here dynamically -->
+                    </div>
+                </div>
+                <!-- Support Services Section -->
+                <div class="bg-white rounded-xl shadow-md p-8">
+                    <h2 class="text-2xl font-bold text-[#1C160C] mb-6">Support Services</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="flex flex-col items-center bg-gray-50 rounded-lg p-6 shadow-sm">
+                            <div class="text-3xl mb-2">🔧</div>
+                            <h3 class="text-lg font-semibold mb-2">Maintenance Support</h3>
+                            <p class="text-[#A18249] mb-4 text-center">Schedule maintenance, track service history, and get expert advice</p>
+                            <button class="w-full py-2 px-4 bg-primary text-white rounded-md hover:bg-green-700 transition">Schedule Service</button>
+                        </div>
+                        <div class="flex flex-col items-center bg-gray-50 rounded-lg p-6 shadow-sm">
+                            <div class="text-3xl mb-2">📄</div>
+                            <h3 class="text-lg font-semibold mb-2">Document Assistance</h3>
+                            <p class="text-[#A18249] mb-4 text-center">Get help with vehicle documentation, insurance, and registration</p>
+                            <button class="w-full py-2 px-4 bg-primary text-white rounded-md hover:bg-green-700 transition">View Documents</button>
+                        </div>
+                        <div class="flex flex-col items-center bg-gray-50 rounded-lg p-6 shadow-sm">
+                            <div class="text-3xl mb-2">💬</div>
+                            <h3 class="text-lg font-semibold mb-2">24/7 Support</h3>
+                            <p class="text-[#A18249] mb-4 text-center">Connect with our support team anytime for immediate assistance</p>
+                            <button class="w-full py-2 px-4 bg-primary text-white rounded-md hover:bg-green-700 transition">Contact Support</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- Footer Navigation -->
+        <footer class="flex justify-center bg-white shadow-inner py-4 mt-8">
+            <div class="flex max-w-4xl w-full flex-col">
+                <div class="pb-3">
+                    <div class="flex border-b border-[#E9DFCE] px-4 justify-between">
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] gap-1 pb-[7px] pt-2.5 flex-1" href="community.html">
+                            <div class="text-[#A18249]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M164.47,195.63a8,8,0,0,1-6.7,12.37H10.23a8,8,0,0,1-6.7-12.37,95.83,95.83,0,0,1,47.22-37.71,60,60,0,1,1,66.5,0A95.83,95.83,0,0,1,164.47,195.63Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Community</p>
+                        </a>
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] border-[#019863] gap-1 pb-[7px] pt-2.5 flex-1" href="company.html">
+                            <div class="text-[#019863]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M240,208H224V96a16,16,0,0,0-16-16H144V32a16,16,0,0,0-24.88-13.32L39.12,72A16,16,0,0,0,32,85.34V208H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em] text-[#019863]">Company</p>
+                        </a>
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] gap-1 pb-[7px] pt-2.5 flex-1" href="maps.html">
+                            <div class="text-[#A18249]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M228.92,49.69a8,8,0,0,0-6.86-1.45L160.93,63.52,99.58,32.84a8,8,0,0,0-5.52-.6l-64,16A8,8,0,0,0,24,56V200a8,8,0,0,0,9.94,7.76l61.13-15.28,61.35,30.68A8.15,8.15,0,0,0,160,224a8,8,0,0,0,1.94-.24l64-16A8,8,0,0,0,232,200V56A8,8,0,0,0,228.92,49.69Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Maps</p>
+                        </a>
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] gap-1 pb-[7px] pt-2.5 flex-1" href="marketplace.html">
+                            <div class="text-[#A18249]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M222.14,58.87A8,8,0,0,0,216,56H54.68L49.79,29.14A16,16,0,0,0,34.05,16H16a8,8,0,0,0,0,16h18L59.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,152,204a28,28,0,1,0,28-28H83.17a8,8,0,0,1-7.87-6.57L72.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,222.14,58.87Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Market</p>
+                        </a>
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] gap-1 pb-[7px] pt-2.5 flex-1" href="calculator.html">
+                            <div class="text-[#A18249]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M200,32H56A24,24,0,0,0,32,56V200a24,24,0,0,0,24,24H200a24,24,0,0,0,24-24V56A24,24,0,0,0,200,32Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Calculator</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Add Vehicle Modal -->
+    <div id="addVehicleModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-8 relative max-h-[90vh] overflow-y-auto">
+            <button class="close absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold">&times;</button>
+            <h2 class="text-2xl font-bold mb-6">Add New Vehicle</h2>
+            <form id="vehicleForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Vehicle Type</label>
+                    <select name="type" class="form-input" required>
+                        <option value="" disabled selected>Select type</option>
+                        <option value="car">Car</option>
+                        <option value="bike">Bike</option>
+                        <option value="scooter">Scooter</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Company</label>
+                    <input type="text" name="company" class="form-input" placeholder="e.g., Toyota" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Model</label>
+                    <input type="text" name="model" class="form-input" placeholder="e.g., Camry" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Year</label>
+                    <input type="number" name="year" class="form-input" placeholder="e.g., 2022" required min="1900" max="2024">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Color</label>
+                    <input type="text" name="color" class="form-input" placeholder="e.g., Silver">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Registration Number</label>
+                    <input type="text" name="registration_number" class="form-input" placeholder="e.g., MH02AB1234">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Purchase Date</label>
+                    <input type="date" name="purchase_date" class="form-input">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Price</label>
+                    <input type="number" name="price" class="form-input" placeholder="e.g., 10000" required min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Mileage</label>
+                    <input type="number" name="mileage" class="form-input" placeholder="e.g., 15000" required min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Fuel Type</label>
+                    <select name="fuel_type" class="form-input" required>
+                        <option value="petrol">Petrol</option>
+                        <option value="diesel">Diesel</option>
+                        <option value="electric">Electric</option>
+                        <option value="hybrid">Hybrid</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Transmission</label>
+                    <select name="transmission" class="form-input" required>
+                        <option value="manual">Manual</option>
+                        <option value="automatic">Automatic</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary w-full mt-6">Add Vehicle</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/js/admin-profile.js"></script>
+    <script>
+        // Utility functions
+        const apiCall = (url, options = {}) => {
+            return fetch(url, { credentials: 'include', ...options });
+        };
+
+        const checkUserSession = async () => {
+            const user = localStorage.getItem('user');
+            if (!user) return false;
+            
+            try {
+                const response = await apiCall('/check_login');
+                if (!response.ok) {
+                    localStorage.removeItem('user');
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Error checking login status:', error);
+                localStorage.removeItem('user');
+                return false;
+            }
+        };
+
+        // Clear cache on back/forward navigation
+        if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+            window.location.reload();
+        }
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Check authentication
+            const isLoggedIn = await checkUserSession();
+            if (!isLoggedIn) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            initializePage();
+        });
+
+        function initializePage() {
+            // Modal functionality
+            document.getElementById('addVehicleBtn').addEventListener('click', () => {
+                document.getElementById('addVehicleModal').classList.remove('hidden');
+            });
+
+            document.querySelectorAll('.close').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.getElementById('addVehicleModal').classList.add('hidden');
+                });
+            });
+
+            // Vehicle form handler
+            document.getElementById('vehicleForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                
+                const vehicleData = {
+                    company: formData.get('company'),
+                    model: formData.get('model'),
+                    year: formData.get('year') ? parseInt(formData.get('year')) : null,
+                    price: formData.get('price') ? parseFloat(formData.get('price')) : null,
+                    mileage: formData.get('mileage') ? parseFloat(formData.get('mileage')) : null,
+                    fuel_type: formData.get('fuel_type'),
+                    transmission: formData.get('transmission'),
+                    color: formData.get('color') || null,
+                    registration_number: formData.get('registration_number') || null,
+                    purchase_date: formData.get('purchase_date') || null,
+                    type: formData.get('type') || null
+                };
+
+                // Remove null/empty values
+                Object.keys(vehicleData).forEach(key => {
+                    if (vehicleData[key] === null || vehicleData[key] === '') {
+                        delete vehicleData[key];
+                    }
+                });
+
+                try {
+                    const response = await apiCall('/api/vehicles', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(vehicleData)
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            window.location.href = 'login.html';
+                            return;
+                        }
+                        const errorText = await response.text();
+                        throw new Error(errorText);
+                    }
+
+                    document.getElementById('addVehicleModal').classList.add('hidden');
+                    this.reset();
+                    loadUserVehicles();
+                } catch (error) {
+                    console.error('Error adding vehicle:', error);
+                    alert('Error adding vehicle: ' + error.message);
+                }
+            });
+
+            loadUserVehicles();
+
+            // Logout functionality
+            document.getElementById('logoutBtnHeader').addEventListener('click', function() {
+                apiCall('/logout', { method: 'POST' })
+                    .then(() => { 
+                        localStorage.removeItem('user');
+                        window.location.href = 'login.html'; 
+                    })
+                    .catch(error => console.error('Error logging out:', error));
+            });
+        }
+
+        async function loadUserVehicles() {
+            try {
+                const response = await apiCall('/api/vehicles');
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const vehicles = await response.json();
+                displayVehicles(vehicles);
+            } catch (error) {
+                console.error('Error loading vehicles:', error);
+            }
+        }
+
+        function displayVehicles(vehicles) {
+            const vehicleGrid = document.getElementById('vehicleGrid');
+            vehicleGrid.innerHTML = '';
+
+            if (!vehicles.length) {
+                vehicleGrid.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <p class="text-gray-500">You haven't added any vehicles yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            vehicles.forEach(vehicle => {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-50 rounded-lg p-6 shadow-sm';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-semibold">${vehicle.model}</h3>
+                        <span class="text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+                    </div>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <p><span class="font-medium">Registration:</span> ${vehicle.registration}</p>
+                        <p><span class="font-medium">Mileage:</span> ${vehicle.mileage} km</p>
+                        <p><span class="font-medium">Purchase Date:</span> ${new Date(vehicle.purchase_date).toLocaleDateString()}</p>
+                    </div>
+                    <div class="mt-4 flex space-x-2">
+                        <button class="flex-1 py-2 px-3 bg-primary text-white text-sm rounded hover:bg-green-700 transition">Service History</button>
+                        <button class="flex-1 py-2 px-3 bg-gray-200 text-gray-800 text-sm rounded hover:bg-gray-300 transition">Details</button>
+                    </div>
+                `;
+                vehicleGrid.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>

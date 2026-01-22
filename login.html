@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h1>
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label for="username" class="block text-gray-700">Username</label>
+                <input type="text" id="username" name="username" required class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400">
+            </div>
+            <div>
+                <label for="password" class="block text-gray-700">Password</label>
+                <input type="password" id="password" name="password" required class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400">
+            </div>
+            <button type="submit" class="w-full py-2 px-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-md transition">Login</button>
+            <div id="error" class="error text-red-500 text-center mt-2" style="display: none;"></div>
+        </form>
+        <div class="text-center mt-4 text-gray-600">
+            Don't have an account? <a href="signup.html" class="text-green-500 hover:underline">Sign Up</a>
+        </div>
+    </div>
+    <script>
+        // Utility functions
+        const apiCall = (url, options = {}) => {
+            return fetch(url, { credentials: 'include', ...options });
+        };
+
+        const checkUserSession = async () => {
+            const user = localStorage.getItem('user');
+            if (!user) return false;
+            
+            try {
+                const response = await apiCall('/check_login');
+                if (!response.ok) {
+                    localStorage.removeItem('user');
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Error checking login status:', error);
+                localStorage.removeItem('user');
+                return false;
+            }
+        };
+
+        // Clear cache on back/forward navigation
+        if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+            window.location.reload();
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check if user is already logged in
+            const isLoggedIn = await checkUserSession();
+            if (isLoggedIn) {
+                window.location.href = 'Company.html';
+                return;
+            }
+
+            // Login form handler
+            const loginForm = document.getElementById('loginForm');
+            const errorMessage = document.getElementById('error');
+            
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(loginForm);
+                const data = {
+                    username: formData.get('username'),
+                    password: formData.get('password')
+                };
+                
+                try {
+                    const response = await apiCall('/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        localStorage.setItem('user', JSON.stringify(result.user));
+                        window.location.href = 'Company.html';
+                    } else {
+                        const error = await response.json();
+                        errorMessage.textContent = error.error;
+                        errorMessage.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Login failed:', error);
+                    errorMessage.textContent = 'Failed to connect to server. Please try again.';
+                    errorMessage.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

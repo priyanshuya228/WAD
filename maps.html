@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenGear - Environmental Mapping</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <link href="assets/css/admin-profile.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Leaflet Routing Machine -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <!-- Leaflet Control Geocoder -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#34C759',
+                        secondary: '#1C160C',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .layout-container {
+            display: flex;
+            height: calc(100vh - 64px);
+            width: 100%;
+        }
+        .sidebar {
+            width: 300px;
+            background: white;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            border-right: 1px solid #ccc;
+            height: 100%;
+        }
+        .map-container {
+            flex: 1;
+            height: calc(100vh - 130px);
+            position: relative;
+            z-index: 1;
+        }
+        #map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 100%;
+            width: 100%;
+            z-index: 1;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        .search-container input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .search-button {
+            width: 100%;
+            padding: 8px;
+            background: #34C759;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .search-button:hover {
+            background: #2db14e;
+        }
+        .btn {
+            padding: 8px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #f0f0f0;
+            transition: background-color 0.2s;
+        }
+        .btn:hover {
+            background: #e0e0e0;
+        }
+        .btn-primary {
+            background: #34C759;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2db14e;
+        }
+        .user-location-marker {
+            background: #34C759;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 4px rgba(0,0,0,0.3);
+        }
+        .destination-marker {
+            background: #FF3B30;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 4px rgba(0,0,0,0.3);
+        }
+        .route-details {
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .bottom-panel {
+            position: fixed;
+            bottom: 64px;
+            left: 300px;
+            right: 0;
+            background: white;
+            padding: 10px 20px;
+            border-top: 1px solid #ccc;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+        #trip-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f8f8;
+            border-radius: 8px;
+        }
+        .trip-card {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .trip-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .trip-card p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .impact-score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #34C759;
+        }
+        .impact-score.high {
+            color: #FF3B30;
+        }
+        .impact-score.medium {
+            color: #FF9500;
+        }
+        .impact-score.low {
+            color: #34C759;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex flex-col min-h-screen">
+        <header class="flex items-center justify-between px-6 py-4 bg-white shadow-sm">
+            <h1 class="text-xl font-bold text-[#1C160C]">Environmental Mapping</h1>
+            <div class="relative flex items-center gap-4">
+                <div id="authButtons" class="flex items-center space-x-4" style="display: none;">
+                    <a href="login.html" class="btn-primary">Login</a>
+                    <a href="signup.html" class="text-[#019863] hover:text-[#017A4E]">Sign up</a>
+                </div>
+                <button id="userProfileBtn" class="flex items-center space-x-2 focus:outline-none" style="display: none;"></button>
+                <div id="userDropdown" class="user-dropdown"></div>
+                <button id="logoutBtnHeader" class="hidden px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">Logout</button>
+            </div>
+        </header>
+
+        <div class="layout-container">
+            <div class="sidebar">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Search for a location...">
+                    <button class="search-button" onclick="searchLocation()">Search</button>
+                </div>
+
+
+
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold mb-2">Navigation</h3>
+                    <button id="start-navigation" class="btn btn-primary" onclick="startNavigation()">Start Navigation</button>
+                    <button id="stop-navigation" class="btn" onclick="stopNavigation()" style="display: none;">Stop Navigation</button>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold mb-2">Map Layers</h3>
+                    <button class="btn" onclick="toggleHeatmap()">Toggle Heatmap</button>
+                    <button class="btn" onclick="toggleTraffic()">Toggle Traffic</button>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold mb-2">Environmental Data</h3>
+                    <div id="environmental-data">
+                        <p>Air Quality: <span id="air-quality">Loading...</span></p>
+                        <p>Carbon Footprint: <span id="carbon-footprint">Loading...</span></p>
+                        <p>Green Spaces: <span id="green-spaces">Loading...</span></p>
+                    </div>
+                </div>
+
+                <div id="trip-summary" style="display: none;">
+                    <h3 class="text-lg font-semibold mb-2">Trip Summary</h3>
+                    <div id="trip-details"></div>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <div class="bottom-panel" id="bottom-panel" style="display: none;">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #34C759;"></div>
+                    <span>Low Impact</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FF9500;"></div>
+                    <span>Medium Impact</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FF3B30;"></div>
+                    <span>High Impact</span>
+                </div>
+            </div>
+            <div id="current-instruction"></div>
+            <div id="eta-display"></div>
+        </div>
+
+        <!-- Footer Navigation -->
+        <footer class="flex justify-center bg-white shadow-inner py-4 mt-8">
+            <div class="flex max-w-4xl w-full flex-col">
+                <div class="pb-3">
+                    <div class="flex border-b border-[#E9DFCE] px-4 justify-between">
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] gap-1 pb-[7px] pt-2.5 flex-1" href="community.html">
+                            <div class="text-[#A18249]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M164.47,195.63a8,8,0,0,1-6.7,12.37H10.23a8,8,0,0,1-6.7-12.37,95.83,95.83,0,0,1,47.22-37.71,60,60,0,1,1,66.5,0A95.83,95.83,0,0,1,164.47,195.63Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Community</p>
+                        </a>
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] gap-1 pb-[7px] pt-2.5 flex-1" href="company.html">
+                            <div class="text-[#A18249]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M240,208H224V96a16,16,0,0,0-16-16H144V32a16,16,0,0,0-24.88-13.32L39.12,72A16,16,0,0,0,32,85.34V208H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Company</p>
+                        </a>
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] border-[#019863] gap-1 pb-[7px] pt-2.5 flex-1" href="maps.html">
+                            <div class="text-[#019863]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M228.92,49.69a8,8,0,0,0-6.86-1.45L160.93,63.52,99.58,32.84a8,8,0,0,0-5.52-.6l-64,16A8,8,0,0,0,24,56V200a8,8,0,0,0,9.94,7.76l61.13-15.28,61.35,30.68A8.15,8.15,0,0,0,160,224a8,8,0,0,0,1.94-.24l64-16A8,8,0,0,0,232,200V56A8,8,0,0,0,228.92,49.69Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em] text-[#019863]">Maps</p>
+                        </a>
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] gap-1 pb-[7px] pt-2.5 flex-1" href="marketplace.html">
+                            <div class="text-[#A18249]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M222.14,58.87A8,8,0,0,0,216,56H54.68L49.79,29.14A16,16,0,0,0,34.05,16H16a8,8,0,0,0,0,16h18L59.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,152,204a28,28,0,1,0,28-28H83.17a8,8,0,0,1-7.87-6.57L72.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,222.14,58.87Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Market</p>
+                        </a>
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] gap-1 pb-[7px] pt-2.5 flex-1" href="calculator.html">
+                            <div class="text-[#A18249]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M200,32H56A24,24,0,0,0,32,56V200a24,24,0,0,0,24,24H200a24,24,0,0,0,24-24V56A24,24,0,0,0,200,32Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Calculator</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="assets/js/admin-profile.js"></script>
+    <script>
+        // Utility functions
+        const apiCall = (url, options = {}) => {
+            return fetch(url, { credentials: 'include', ...options });
+        };
+
+        const updateAuthUI = (userData) => {
+            const userProfileBtn = document.getElementById('userProfileBtn');
+            const authButtons = document.getElementById('authButtons');
+            const logoutBtn = document.getElementById('logoutBtnHeader');
+            
+            if (userData.user) {
+                userProfileBtn.style.display = 'flex';
+                authButtons.style.display = 'none';
+                logoutBtn.classList.remove('hidden');
+            } else {
+                userProfileBtn.style.display = 'none';
+                authButtons.style.display = 'flex';
+                logoutBtn.classList.add('hidden');
+            }
+        };
+
+        // Global variables
+        let map, routingControl, userMarker, destinationMarker, accuracyCircle;
+        let heatmapLayer, trafficLayer;
+        let isNavigating = false, watchId, navigationInterval;
+        let currentInstructions = [], currentInstructionIndex = 0;
+
+        // Initialize map
+        function initMap() {
+            map = L.map('map').setView([37.7749, -122.4194], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Add geocoder control
+            L.Control.geocoder({
+                defaultMarkGeocode: false
+            }).on('markgeocode', function(e) {
+                const bbox = e.geocode.bbox;
+                const poly = L.polygon([
+                    bbox.getSouthEast(),
+                    bbox.getNorthEast(),
+                    bbox.getNorthWest(),
+                    bbox.getSouthWest()
+                ]);
+                map.fitBounds(poly.getBounds());
+            }).addTo(map);
+
+            // Initialize routing control
+            routingControl = L.Routing.control({
+                waypoints: [],
+                routeWhileDragging: true,
+                showAlternatives: false,
+                fitSelectedRoutes: true,
+                lineOptions: {
+                    styles: [{ color: '#34C759', opacity: 0.8, weight: 6 }]
+                }
+            }).addTo(map);
+
+            // Handle route calculation
+            routingControl.on('routesfound', function(e) {
+                const routes = e.routes;
+                if (routes.length > 0) {
+                    const route = routes[0];
+                    currentInstructions = route.instructions;
+                    currentInstructionIndex = 0;
+                    
+                    // Show trip summary
+                    showTripSummary(route);
+                }
+            });
+
+            // Get user location on map load
+            getUserLocation();
+
+            // Initialize map size
+            setTimeout(function() {
+                map.invalidateSize(true);
+            }, 100);
+        }
+
+        // Get user location with permission handling
+        function getUserLocation() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by this browser.');
+                return;
+            }
+
+            // Show loading message
+            document.getElementById('air-quality').textContent = 'Getting location...';
+            document.getElementById('carbon-footprint').textContent = 'Please allow location access';
+            document.getElementById('green-spaces').textContent = 'Waiting for permission...';
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const userLatLng = L.latLng(position.coords.latitude, position.coords.longitude);
+                    
+                    // Update map view to user location
+                    map.setView(userLatLng, 15);
+                    
+                    // Add user marker
+                    if (userMarker) {
+                        map.removeLayer(userMarker);
+                    }
+                    
+                    userMarker = L.marker(userLatLng, {
+                        icon: L.divIcon({
+                            className: 'user-location-marker',
+                            html: '<div class="user-location-marker"></div>',
+                            iconSize: [12, 12],
+                            iconAnchor: [6, 6]
+                        })
+                    }).addTo(map);
+
+                    // Add accuracy circle
+                    if (accuracyCircle) {
+                        map.removeLayer(accuracyCircle);
+                    }
+                    
+                    accuracyCircle = L.circle(userLatLng, {
+                        radius: position.coords.accuracy,
+                        color: '#34C759',
+                        fillColor: '#34C75933',
+                        fillOpacity: 0.3
+                    }).addTo(map);
+
+                    // Update environmental data
+                    updateEnvironmentalData(userLatLng);
+                    
+                    console.log('User location obtained:', userLatLng);
+                },
+                function(error) {
+                    console.error('Error getting location:', error);
+                    let errorMessage = 'Unable to get your location.';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Location permission denied. Please enable location access in your browser settings.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Location information unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Location request timed out.';
+                            break;
+                    }
+                    
+                    alert(errorMessage);
+                    document.getElementById('air-quality').textContent = 'Location access denied';
+                    document.getElementById('carbon-footprint').textContent = 'Please enable location';
+                    document.getElementById('green-spaces').textContent = 'Permission required';
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                }
+            );
+        }
+
+        // Update environmental data based on location
+        function updateEnvironmentalData(location) {
+            // Simulate environmental data based on location
+            const airQuality = Math.floor(Math.random() * 50) + 50; // 50-100
+            const carbonFootprint = Math.floor(Math.random() * 20) + 10; // 10-30
+            const greenSpaces = Math.floor(Math.random() * 30) + 20; // 20-50
+            
+            document.getElementById('air-quality').textContent = `${airQuality} (Good)`;
+            document.getElementById('carbon-footprint').textContent = `${carbonFootprint} kg CO2`;
+            document.getElementById('green-spaces').textContent = `${greenSpaces}% coverage`;
+        }
+
+        // Search functionality
+        function searchLocation() {
+            const query = document.getElementById('search-input').value;
+            if (!query) return;
+
+            // Use geocoder to search
+            const geocoder = L.Control.geocoder();
+            geocoder.options.geocoder.geocode(query, function(results) {
+                if (results.length > 0) {
+                    const result = results[0];
+                    const latlng = result.center;
+                    
+                    // Add destination marker
+                    if (destinationMarker) {
+                        map.removeLayer(destinationMarker);
+                    }
+                    
+                    destinationMarker = L.marker(latlng, {
+                        icon: L.divIcon({
+                            className: 'destination-marker',
+                            html: '<div class="destination-marker"></div>',
+                            iconSize: [12, 12],
+                            iconAnchor: [6, 6]
+                        })
+                    }).addTo(map);
+
+                    // Create route from user location to destination
+                    if (userMarker) {
+                        const userLatLng = userMarker.getLatLng();
+                        routingControl.setWaypoints([userLatLng, latlng]);
+                    } else {
+                        // If no user location, get it first
+                        getUserLocation();
+                        setTimeout(() => {
+                            if (userMarker && destinationMarker) {
+                                const userLatLng = userMarker.getLatLng();
+                                const destLatLng = destinationMarker.getLatLng();
+                                routingControl.setWaypoints([userLatLng, destLatLng]);
+                            }
+                        }, 2000);
+                    }
+                }
+            });
+        }
+
+        // Navigation functions
+        function startNavigation() {
+            if (!destinationMarker) {
+                alert('Please search for a destination first');
+                return;
+            }
+
+            isNavigating = true;
+            document.getElementById('start-navigation').style.display = 'none';
+            document.getElementById('stop-navigation').style.display = 'block';
+            document.getElementById('bottom-panel').style.display = 'flex';
+
+            // Start watching user location
+            watchId = navigator.geolocation.watchPosition(
+                updateNavigation,
+                function(error) {
+                    console.error('Error getting location:', error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+
+            // Start regular updates for UI
+            navigationInterval = setInterval(() => {
+                if (userMarker) {
+                    updateNavigationUI(userMarker.getLatLng());
+                }
+            }, 1000);
+        }
+
+        function stopNavigation() {
+            isNavigating = false;
+            document.getElementById('start-navigation').style.display = 'block';
+            document.getElementById('stop-navigation').style.display = 'none';
+
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+
+            if (navigationInterval) {
+                clearInterval(navigationInterval);
+                navigationInterval = null;
+            }
+
+            document.getElementById('current-instruction').innerHTML = 'Navigation stopped';
+            document.getElementById('eta-display').textContent = '';
+        }
+
+        function updateNavigation(position) {
+            if (!isNavigating) return;
+
+            const userLocation = L.latLng(position.coords.latitude, position.coords.longitude);
+
+            if (!userMarker) {
+                userMarker = L.marker(userLocation, {
+                    icon: L.divIcon({
+                        className: 'user-location-marker',
+                        html: '<div class="user-location-marker"></div>',
+                        iconSize: [12, 12],
+                        iconAnchor: [6, 6]
+                    })
+                }).addTo(map);
+            } else {
+                userMarker.setLatLng(userLocation);
+            }
+
+            if (!accuracyCircle) {
+                accuracyCircle = L.circle(userLocation, {
+                    radius: position.coords.accuracy,
+                    color: '#34C759',
+                    fillColor: '#34C75933',
+                    fillOpacity: 0.3
+                }).addTo(map);
+            } else {
+                accuracyCircle.setLatLng(userLocation);
+                accuracyCircle.setRadius(position.coords.accuracy);
+            }
+
+            if (routingControl && destinationMarker) {
+                const waypoints = [
+                    userLocation,
+                    destinationMarker.getLatLng()
+                ];
+                routingControl.setWaypoints(waypoints);
+            }
+
+            updateNavigationUI(userLocation);
+            map.panTo(userLocation, { animate: true, duration: 1 });
+        }
+
+        function updateNavigationUI(userLocation) {
+            if (!routingControl || !userLocation) return;
+
+            const waypoints = routingControl.getWaypoints();
+            if (waypoints.length < 2) return;
+
+            const destination = waypoints[waypoints.length - 1].latLng;
+            const distanceToDestination = userLocation.distanceTo(destination);
+
+            let nextInstruction = '';
+            let distanceToNextTurn = '';
+            
+            if (currentInstructions.length > currentInstructionIndex) {
+                const instruction = currentInstructions[currentInstructionIndex];
+                const distanceToTurn = userLocation.distanceTo(instruction.location);
+                
+                if (distanceToTurn < 20) {
+                    currentInstructionIndex++;
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(instruction.text);
+                        window.speechSynthesis.speak(utterance);
+                    }
+                }
+
+                nextInstruction = instruction.text;
+                distanceToNextTurn = `In ${(distanceToTurn / 1000).toFixed(1)} km`;
+            }
+
+            document.getElementById('current-instruction').innerHTML = `
+                <div class="route-details">
+                    <p class="text-lg font-semibold">${nextInstruction || 'Follow the route'}</p>
+                    <p class="text-sm text-gray-600">${distanceToNextTurn}</p>
+                    <p class="text-sm text-gray-600">Distance to destination: ${(distanceToDestination / 1000).toFixed(1)} km</p>
+                </div>
+            `;
+
+            const speed = 50;
+            const timeToDestination = (distanceToDestination / 1000) / speed * 60;
+            const eta = new Date(Date.now() + timeToDestination * 60000);
+            document.getElementById('eta-display').textContent = `ETA: ${eta.toLocaleTimeString()}`;
+        }
+
+        // Layer toggle functions
+        function toggleHeatmap() {
+            if (heatmapLayer) {
+                map.removeLayer(heatmapLayer);
+                heatmapLayer = null;
+            } else {
+                const heatData = [
+                    [37.7749, -122.4194, 0.8],
+                    [37.7748, -122.4180, 0.6],
+                ];
+                heatmapLayer = L.heatLayer(heatData).addTo(map);
+            }
+        }
+
+        function toggleTraffic() {
+            if (trafficLayer) {
+                map.removeLayer(trafficLayer);
+                trafficLayer = null;
+            } else {
+                trafficLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=traffic&x={x}&y={y}&z={z}', {
+                    maxZoom: 20
+                }).addTo(map);
+            }
+        }
+
+        function showTripSummary(route) {
+            const summary = document.getElementById('trip-summary');
+            const details = document.getElementById('trip-details');
+            
+            const distance = (route.summary.totalDistance / 1000).toFixed(1);
+            const duration = Math.round(route.summary.totalTime / 60);
+            
+            details.innerHTML = `
+                <div class="trip-card">
+                    <h3>Trip Summary</h3>
+                    <p>Distance: ${distance} km</p>
+                    <p>Duration: ${duration} minutes</p>
+                    <p>Environmental Impact: <span class="impact-score low">Low</span></p>
+                </div>
+            `;
+            
+            summary.style.display = 'block';
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check login status and update UI
+            apiCall('/check_login')
+                .then(res => res.json())
+                .then(data => updateAuthUI(data))
+                .catch(error => console.error('Error checking login status:', error));
+
+            // Initialize map
+            initMap();
+
+            // Logout functionality
+            document.getElementById('logoutBtnHeader').addEventListener('click', function() {
+                apiCall('/logout', { method: 'POST' })
+                    .then(() => { window.location.href = 'login.html'; })
+                    .catch(error => console.error('Error logging out:', error));
+            });
+        });
+    </script>
+</body>
+</html>

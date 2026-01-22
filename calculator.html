@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <link href="assets/css/admin-profile.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#019863',
+                        secondary: '#1C160C',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1C160C;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="relative flex size-full min-h-screen flex-col bg-[#FFFFFF] group/design-root overflow-x-hidden">
+        <div class="px-40 flex flex-1 justify-center py-5">
+            <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
+                <div class="flex flex-wrap justify-between gap-3 p-4">
+                    <p class="text-[#1C160C] text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Calculate your emissions</p>
+                </div>
+
+                <form id="emissionsForm" class="flex flex-col gap-4 px-4 py-3">
+                    <div class="flex flex-col gap-2">
+                        <label for="vehicleType" class="text-[#1C160C] font-medium">Vehicle Type</label>
+                        <select id="vehicleType" class="form-select rounded-xl border border-[#E9DFCE] bg-[#FFFFFF] text-[#1C160C] h-14 p-[15px]">
+                            <option value="">Select vehicle type</option>
+                            <option value="sedan">Sedan</option>
+                            <option value="suv">SUV</option>
+                            <option value="truck">Truck</option>
+                            <option value="electric">Electric Vehicle</option>
+                            <option value="motorcycle">Motorcycle</option>
+                            <option value="hybrid">Hybrid</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="fuelType" class="text-[#1C160C] font-medium">Fuel Type</label>
+                        <select id="fuelType" class="form-select rounded-xl border border-[#E9DFCE] bg-[#FFFFFF] text-[#1C160C] h-14 p-[15px]">
+                            <option value="">Select fuel type</option>
+                            <option value="gasoline">Gasoline</option>
+                            <option value="diesel">Diesel</option>
+                            <option value="electric">Electric</option>
+                            <option value="hybrid">Hybrid</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="drivingStyle" class="text-[#1C160C] font-medium">Driving Style</label>
+                        <select id="drivingStyle" class="form-select rounded-xl border border-[#E9DFCE] bg-[#FFFFFF] text-[#1C160C] h-14 p-[15px]">
+                            <option value="normal">Normal</option>
+                            <option value="aggressive">Aggressive</option>
+                            <option value="eco">Eco-friendly</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="distanceUnit" class="text-[#1C160C] font-medium">Distance Unit</label>
+                        <select id="distanceUnit" class="form-select rounded-xl border border-[#E9DFCE] bg-[#FFFFFF] text-[#1C160C] h-14 p-[15px]">
+                            <option value="milesAnnually">Miles Annually</option>
+                            <option value="kmDaily">Kilometers Daily</option>
+                            <option value="kmMonthly">Kilometers Monthly</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="distanceDriven" class="text-[#1C160C] font-medium">Distance Driven</label>
+                        <input type="number" id="distanceDriven" placeholder="Enter distance driven" class="form-input rounded-xl border border-[#E9DFCE] bg-[#FFFFFF] text-[#1C160C] h-14 p-[15px]">
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="efficiencyUnit" class="text-[#1C160C] font-medium">Efficiency Unit</label>
+                        <select id="efficiencyUnit" class="form-select rounded-xl border border-[#E9DFCE] bg-[#FFFFFF] text-[#1C160C] h-14 p-[15px]">
+                            <option value="mpg">Miles per Gallon (mpg)</option>
+                            <option value="kmpl">Kilometers per Liter (km/L)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="fuelEfficiency" class="text-[#1C160C] font-medium">Fuel Efficiency</label>
+                        <input type="number" id="fuelEfficiency" placeholder="Enter fuel efficiency" class="form-input rounded-xl border border-[#E9DFCE] bg-[#FFFFFF] text-[#1C160C] h-14 p-[15px]">
+                    </div>
+
+                    <button type="submit" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-5 flex-1 bg-[#019863] text-[#FFFFFF] text-base font-bold leading-normal tracking-[0.015em]">
+                        <span class="truncate">Calculate Emissions</span>
+                    </button>
+                </form>
+
+                <div id="emissionsResult" class="flex flex-col gap-4 p-4 hidden">
+                    <!-- Primary Emissions Display -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="flex flex-col gap-2 rounded-xl p-6 border border-[#E9DFCE]">
+                            <p class="text-[#1C160C] text-base font-medium leading-normal">Annual Emissions</p>
+                            <p id="co2EmissionsYear" class="text-[#1C160C] tracking-light text-2xl font-bold leading-tight">-- Tons</p>
+                        </div>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 border border-[#E9DFCE]">
+                            <p class="text-[#1C160C] text-base font-medium leading-normal">Monthly Emissions</p>
+                            <p id="co2EmissionsMonth" class="text-[#1C160C] tracking-light text-2xl font-bold leading-tight">-- Tons</p>
+                        </div>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 border border-[#E9DFCE]">
+                            <p class="text-[#1C160C] text-base font-medium leading-normal">Daily Emissions</p>
+                            <p id="co2EmissionsDay" class="text-[#1C160C] tracking-light text-2xl font-bold leading-tight">-- Tons</p>
+                        </div>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 border border-[#E9DFCE]">
+                            <p class="text-[#1C160C] text-base font-medium leading-normal">Carbon Score</p>
+                            <p id="carbonScore" class="text-[#1C160C] tracking-light text-2xl font-bold leading-tight">--</p>
+                        </div>
+                    </div>
+
+                    <!-- Environmental Impact Section -->
+                    <div class="mt-8">
+                        <h3 class="text-[#1C160C] text-lg font-semibold mb-4">Your Environmental Impact</h3>
+                        <div class="positive-message" id="positiveMessage"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="impact-card">
+                                <div class="impact-icon">🌳</div>
+                                <h4 class="text-[#1C160C] font-medium">Trees Equivalent</h4>
+                                <p id="treesEquivalent" class="text-2xl font-bold text-[#019863]">0</p>
+                                <p class="text-[#A18249]">Trees needed to offset your emissions</p>
+                            </div>
+                            <div class="impact-card">
+                                <div class="impact-icon">💚</div>
+                                <h4 class="text-[#1C160C] font-medium">Carbon Score</h4>
+                                <p id="carbonScoreDisplay" class="text-2xl font-bold text-[#019863]">0</p>
+                                <p class="text-[#A18249]">Your environmental rating</p>
+                            </div>
+                            <div class="impact-card">
+                                <div class="impact-icon">🌍</div>
+                                <h4 class="text-[#1C160C] font-medium">Global Impact</h4>
+                                <p id="globalPercentile" class="text-2xl font-bold text-[#019863]">0%</p>
+                                <p class="text-[#A18249]">Better than global average</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="text-[#1C160C] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Recommendations</h2>
+                <div id="recommendations" class="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-3 p-4">
+                    <!-- Recommendations will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <footer class="flex justify-center bg-white shadow-inner py-4 mt-8">
+            <div class="flex max-w-4xl w-full flex-col">
+                <div class="pb-3">
+                    <div class="flex border-b border-[#E9DFCE] px-4 justify-between">
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] gap-1 pb-[7px] pt-2.5 flex-1" href="community.html">
+                            <div class="text-[#A18249]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M164.47,195.63a8,8,0,0,1-6.7,12.37H10.23a8,8,0,0,1-6.7-12.37,95.83,95.83,0,0,1,47.22-37.71,60,60,0,1,1,66.5,0A95.83,95.83,0,0,1,164.47,195.63Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Community</p>
+                        </a>
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] gap-1 pb-[7px] pt-2.5 flex-1" href="company.html">
+                            <div class="text-[#A18249]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M240,208H224V96a16,16,0,0,0-16-16H144V32a16,16,0,0,0-24.88-13.32L39.12,72A16,16,0,0,0,32,85.34V208H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Company</p>
+                        </a>
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] gap-1 pb-[7px] pt-2.5 flex-1" href="maps.html">
+                            <div class="text-[#A18249]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M228.92,49.69a8,8,0,0,0-6.86-1.45L160.93,63.52,99.58,32.84a8,8,0,0,0-5.52-.6l-64,16A8,8,0,0,0,24,56V200a8,8,0,0,0,9.94,7.76l61.13-15.28,61.35,30.68A8.15,8.15,0,0,0,160,224a8,8,0,0,0,1.94-.24l64-16A8,8,0,0,0,232,200V56A8,8,0,0,0,228.92,49.69Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Maps</p>
+                        </a>
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] gap-1 pb-[7px] pt-2.5 flex-1" href="marketplace.html">
+                            <div class="text-[#A18249]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M222.14,58.87A8,8,0,0,0,216,56H54.68L49.79,29.14A16,16,0,0,0,34.05,16H16a8,8,0,0,0,0,16h18L59.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,152,204a28,28,0,1,0,28-28H83.17a8,8,0,0,1-7.87-6.57L72.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,222.14,58.87Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Market</p>
+                        </a>
+                        <a class="nav-link flex flex-col items-center justify-center border-b-[3px] border-[#019863] gap-1 pb-[7px] pt-2.5 flex-1" href="calculator.html">
+                            <div class="text-[#019863]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M200,32H56A24,24,0,0,0,32,56V200a24,24,0,0,0,24,24H200a24,24,0,0,0,24-24V56A24,24,0,0,0,200,32Z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em] text-[#019863]">Calculator</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Constants for emissions calculations
+        const EMISSIONS_FACTORS = {
+            sedan: { co2: 8.887, ch4: 0.0178, n2o: 0.0148 },
+            suv: { co2: 10.657, ch4: 0.0214, n2o: 0.0178 },
+            truck: { co2: 12.874, ch4: 0.0267, n2o: 0.0223 },
+            electric: { co2: 0, ch4: 0, n2o: 0 },
+            motorcycle: { co2: 4.445, ch4: 0.0089, n2o: 0.0074 },
+            hybrid: { co2: 6.657, ch4: 0.0134, n2o: 0.0112 }
+        };
+
+        const DRIVING_STYLE_FACTORS = {
+            normal: 1,
+            aggressive: 1.3,
+            eco: 0.8
+        };
+
+        const FUEL_TYPE_FACTORS = {
+            gasoline: 1,
+            diesel: 1.1,
+            electric: 0.4,
+            hybrid: 0.7
+        };
+
+        // Utility functions
+        function saveToLocalStorage(data) {
+            let history = JSON.parse(localStorage.getItem('emissionsHistory') || '[]');
+            history.push({
+                ...data,
+                timestamp: new Date().toISOString()
+            });
+            if (history.length > 10) {
+                history = history.slice(-10);
+            }
+            localStorage.setItem('emissionsHistory', JSON.stringify(history));
+        }
+
+        function getHistory() {
+            const history = JSON.parse(localStorage.getItem('emissionsHistory') || '[]');
+            return history.slice(-10);
+        }
+
+        function calculateCarbonScore(emissions) {
+            const baseScore = 100;
+            const avgEmissions = 4.6;
+            return Math.max(0, Math.round(baseScore * (1 - emissions / (2 * avgEmissions))));
+        }
+
+        function calculateTreesNeeded(emissions) {
+            return Math.round(emissions * 1000 / 22);
+        }
+
+        function calculateGlobalPercentile(emissions) {
+            const globalAverage = 4.6;
+            const percentage = ((globalAverage - emissions) / globalAverage) * 100;
+            return Math.max(0, Math.min(100, percentage));
+        }
+
+        function getPositiveMessage(emissions, previousEmissions) {
+            if (!previousEmissions) {
+                return "Every journey begins with a single step. You're on your way to making a difference!";
+            }
+            
+            if (emissions < previousEmissions) {
+                const reduction = ((previousEmissions - emissions) / previousEmissions * 100).toFixed(1);
+                return `Amazing! You've reduced your emissions by ${reduction}%! Keep up the great work! 🌟`;
+            }
+            
+            return "Small changes lead to big impacts. Together, we can make a difference!";
+        }
+
+        function generateRecommendations(data) {
+            const recommendations = [];
+
+            if (data.annualEmissions > 4.6) {
+                recommendations.push({
+                    title: "Use Public Transit",
+                    description: "Reduce emissions by up to 1.7 tons/year",
+                    image: "https://cdn.usegalileo.ai/sdxl10/5d51a2e0-e0a2-4e18-a136-13d08b5f61c8.png"
+                });
+            }
+
+            if (data.drivingStyle === 'aggressive') {
+                recommendations.push({
+                    title: "Adopt Eco-Driving",
+                    description: "Save up to 20% on emissions",
+                    image: "https://cdn.usegalileo.ai/sdxl10/9f550320-ca99-4344-8df2-664bbc04ad6b.png"
+                });
+            }
+
+            if (data.vehicleType === 'suv' || data.vehicleType === 'truck') {
+                recommendations.push({
+                    title: "Consider Downsizing",
+                    description: "Switch to a more efficient vehicle",
+                    image: "https://cdn.usegalileo.ai/sdxl10/87039ffc-e46a-4fc1-a4e2-c09f6455c8c8.png"
+                });
+            }
+
+            if (data.fuelType !== 'electric') {
+                recommendations.push({
+                    title: "Go Electric",
+                    description: "Eliminate direct emissions",
+                    image: "https://cdn.usegalileo.ai/sdxl10/87039ffc-e46a-4fc1-a4e2-c09f6455c8c8.png"
+                });
+            }
+
+            const recommendationsContainer = document.getElementById('recommendations');
+            recommendationsContainer.innerHTML = recommendations.map(rec => `
+                <div class="flex flex-col gap-3 pb-3">
+                    <div
+                        class="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-xl"
+                        style='background-image: url("${rec.image}");'
+                    ></div>
+                    <div>
+                        <p class="text-[#1C160C] text-base font-medium leading-normal">${rec.title}</p>
+                        <p class="text-[#A18249] text-sm font-normal leading-normal">${rec.description}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Main calculation function
+        function calculateEmissions(distance, efficiency, vehicleType, drivingStyle, fuelType) {
+            const gallonsPerYear = distance / efficiency;
+            const vehicleFactors = EMISSIONS_FACTORS[vehicleType];
+            const drivingFactor = DRIVING_STYLE_FACTORS[drivingStyle];
+            const fuelFactor = FUEL_TYPE_FACTORS[fuelType];
+
+            const co2Emissions = (gallonsPerYear * vehicleFactors.co2 * drivingFactor * fuelFactor) / 1000;
+            const ch4Emissions = (gallonsPerYear * vehicleFactors.ch4 * drivingFactor * fuelFactor) / 1000;
+            const n2oEmissions = (gallonsPerYear * vehicleFactors.n2o * drivingFactor * fuelFactor) / 1000;
+
+            const totalEmissions = co2Emissions + (ch4Emissions * 25) + (n2oEmissions * 298);
+
+            return {
+                annualEmissions: totalEmissions,
+                monthlyEmissions: totalEmissions / 12,
+                dailyEmissions: totalEmissions / 365,
+                co2Emissions,
+                ch4Emissions,
+                n2oEmissions,
+                distance,
+                efficiency,
+                vehicleType,
+                drivingStyle,
+                fuelType
+            };
+        }
+
+        // Form submission handler
+        document.getElementById('emissionsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            try {
+                const vehicleType = document.getElementById('vehicleType').value;
+                const fuelType = document.getElementById('fuelType').value;
+                const drivingStyle = document.getElementById('drivingStyle').value;
+                const distanceUnit = document.getElementById('distanceUnit').value;
+                const distanceDriven = parseFloat(document.getElementById('distanceDriven').value);
+                const efficiencyUnit = document.getElementById('efficiencyUnit').value;
+                let fuelEfficiency = parseFloat(document.getElementById('fuelEfficiency').value);
+
+                // Input validation
+                if (!vehicleType || !fuelType || !distanceDriven || !fuelEfficiency) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+
+                if (isNaN(distanceDriven) || distanceDriven <= 0) {
+                    alert('Please enter a valid distance');
+                    return;
+                }
+
+                if (isNaN(fuelEfficiency) || fuelEfficiency <= 0) {
+                    alert('Please enter a valid efficiency value');
+                    return;
+                }
+
+                // Convert efficiency if needed
+                if (efficiencyUnit === 'kmpl') {
+                    fuelEfficiency = fuelEfficiency * 2.35214;
+                }
+
+                // Convert distance to annual miles
+                let annualMiles;
+                switch (distanceUnit) {
+                    case 'milesAnnually':
+                        annualMiles = distanceDriven;
+                        break;
+                    case 'kmDaily':
+                        annualMiles = (distanceDriven * 365) / 1.60934;
+                        break;
+                    case 'kmMonthly':
+                        annualMiles = (distanceDriven * 12) / 1.60934;
+                        break;
+                    default:
+                        annualMiles = distanceDriven;
+                }
+
+                // Calculate emissions
+                const results = calculateEmissions(annualMiles, fuelEfficiency, vehicleType, drivingStyle, fuelType);
+
+                if (results && !isNaN(results.annualEmissions)) {
+                    const history = getHistory();
+                    const previousEmissions = history.length > 0 ? history[history.length - 1].annualEmissions : null;
+
+                    // Update display
+                    document.getElementById('co2EmissionsYear').textContent = `${results.annualEmissions.toFixed(2)} Tons`;
+                    document.getElementById('co2EmissionsMonth').textContent = `${results.monthlyEmissions.toFixed(2)} Tons`;
+                    document.getElementById('co2EmissionsDay').textContent = `${results.dailyEmissions.toFixed(2)} Tons`;
+                    
+                    // Update environmental impact
+                    document.getElementById('treesEquivalent').textContent = calculateTreesNeeded(results.annualEmissions);
+                    document.getElementById('carbonScoreDisplay').textContent = calculateCarbonScore(results.annualEmissions);
+                    document.getElementById('globalPercentile').textContent = `${calculateGlobalPercentile(results.annualEmissions).toFixed(1)}%`;
+                    
+                    // Update positive message
+                    document.getElementById('positiveMessage').textContent = getPositiveMessage(results.annualEmissions, previousEmissions);
+
+                    // Generate recommendations
+                    generateRecommendations(results);
+
+                    // Save to history
+                    saveToLocalStorage(results);
+
+                    // Show results
+                    document.getElementById('emissionsResult').classList.remove('hidden');
+                } else {
+                    throw new Error('Invalid calculation results');
+                }
+            } catch (error) {
+                console.error('Error calculating emissions:', error);
+                alert('An error occurred while calculating emissions. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html> 
